@@ -9,7 +9,7 @@ void setup() {
   asm volatile(
     "clr %[sum]        \n\t"   // Clears sum (sets it to 0)
     "ldi %[cnt], 1     \n\t"   // Loads integer 1 inside the register chosen for the counter
-    "ldi %[limit], 11  \n\t"   // Loads integer 11 to the limit ?
+    "ldi %[limit], 11  \n\t"   // Loads integer 11 to the limit 
 
     "loop%=:           \n\t" // Defines loop as a local label, so it can be used later with the BRNE function
     "add %[sum], %[cnt]\n\t"   // Adds the value of the counter to the sum and stores the result in the register dedicated for the sum
