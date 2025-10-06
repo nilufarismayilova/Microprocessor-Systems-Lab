@@ -21,7 +21,7 @@ void setup() {
       [cnt]   "=r"(cnt),
       [limit] "=r"(limit)
     :                              // Input operands (empty in this case)
-    : "cc”.                   // Clobbered list, “cc” tells the compiler that status flags have been changed
+    : "cc”                   
   );
 
   Serial.print("Sum(1..10) = "); 
