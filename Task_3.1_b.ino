@@ -1,5 +1,5 @@
 void setup() {
-  DDRB |= (1 << DDB5);   // Sets the LED (PB5) as an output
+  DDRB |= 0b00100000;   // Sets the LED (PB5) as an output
 }
 
  PORTB |= 0b00100000;  // Turns the LED on by using OR-assign operation (0 OR 1 = 1 / 1 OR 1 = 1)
