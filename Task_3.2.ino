@@ -17,8 +17,8 @@ void setup() {
     "brne loop%=       \n\t" // If the two are not equal, the compiler jumps back to loop and repeats all previous actions. Once the two are equal, the loop breaks.
 
     : [sum]   "=r"(sum),  // Output operands
-      [cnt]   "=r"(cnt),  
-      [limit] "=r"(limit)  
+      [cnt]   "+r"(cnt),  
+      [limit] "+r"(limit)  
     :                    // Input operands (empty in this case)
     : "cc"            // Clobbered list, “cc” tells the compiler that status flags have been changed
   );
