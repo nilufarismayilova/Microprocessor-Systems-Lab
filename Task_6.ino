@@ -65,7 +65,7 @@ void setup() {
 
     sei(); // Enables Global interrupt 
 
-    displayDigit(0);  // Show 0 immediately at startup
+    displayDigit(0);  // Shows 0 immediately at startup
 }
 
 void loop() {
