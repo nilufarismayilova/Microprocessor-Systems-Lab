@@ -1,50 +1,50 @@
 // Receives 1 byte from master - updates LED_B
 // Sends 1 byte back - state of BUTTON_B
 
-#define F_CPU 16000000UL          // CPU clock frequency 
+#define F_CPU 16000000UL // CPU clock frequency 
 #include <avr/io.h>               
 #include <util/delay.h>           
 
-#define SLAVE_ADDR 0x10           // 7-bit I2C slave address
-#define BUTTON_B   PD2            // Button pin on PORTD, bit 2
-#define LED_B      PD3            // LED pin on PORTD, bit 3
+#define SLAVE_ADDR 0x10 // 7-bit I2C slave address
+#define BUTTON_B   PD2  // Button pin on PORTD, bit 2
+#define LED_B      PD3  // LED pin on PORTD, bit 3
 
 void TWI_SlaveInit(uint8_t address)
 {
-    PRR &= ~(1 << PRTWI);         // Enables TWI module by clearing power-reduction TWI (bit 7 in PRR)
+    PRR &= ~(1 << PRTWI);  // Enables TWI module by clearing power-reduction TWI (bit 7 in PRR)
 
-    TWAR = (address << 1);        // Loads 7-bit slave address into TWI address register
+    TWAR = (address << 1);  // Loads 7-bit slave address into TWI address register
 
     TWCR = (1 << TWEA) | (1 << TWEN); // Enables TWI hardware and ACK
 }
 
 void io_init(void)
 {
-    DDRD &= ~(1 << BUTTON_B);     // Sets BUTTON_B as input
-    PORTD |= (1 << BUTTON_B);     // Enables internal pull-up on BUTTON_B
+    DDRD &= ~(1 << BUTTON_B); // Sets BUTTON_B as input
+    PORTD |= (1 << BUTTON_B); // Enables internal pull-up on BUTTON_B
 
-    DDRD |= (1 << LED_B);         // Sets LED_B as output
+    DDRD |= (1 << LED_B); // Sets LED_B as output
 }
 
 int main(void)
 {
-    io_init();                    // Configures button and LED pins
+    io_init(); // Configures button and LED pins
     PORTC |= (1 << PC4) | (1 << PC5); // Enables internal pull-up on SDA/SCL pins, ensuring they are not driven low
 
-    TWI_SlaveInit(SLAVE_ADDR);    // Initializes TWI in slave mode with given address
+    TWI_SlaveInit(SLAVE_ADDR);  // Initializes TWI in slave mode with given address
 
-    uint8_t received = 0;         // Stores last byte received from master
-    uint8_t button_b_state = 0;   // Current logical state of the button
+    uint8_t received = 0;  // Stores last byte received from master
+    uint8_t button_b_state = 0; // Current logical state of the button
 
-    static uint8_t led_b_state = 0;         // Internal LED toggle state
+    static uint8_t led_b_state = 0; // Internal LED toggle state
     static uint8_t prev_button_b_state = 0; // Previous button state for edge detection
-    uint8_t toggle_event_b = 0;             // Flag indicating a button press event
+    uint8_t toggle_event_b = 0; // Flag indicating a button press event
 
     while (1)
     {
         while (!(TWCR & (1 << TWINT))); // Waits until a TWI event is complete (TWINT = 1)
 
-        uint8_t status = TWSR & 0xF8;   // Reads TWI status code (mask prescaler bits)
+        uint8_t status = TWSR & 0xF8; // Reads TWI status code (mask prescaler bits)
 
         // Master to slave write (SLA+W)
         if (status == 0x60 || status == 0x68) // Own address + Write received
@@ -52,16 +52,16 @@ int main(void)
             TWCR = (1 << TWINT) | (1 << TWEA) | (1 << TWEN); // Clears flag, ACK next byte, keeps TWI on
         }
         // Data received from master
-        else if (status == 0x80)       // Data byte received, ACK returned
+        else if (status == 0x80) // Data byte received, ACK returned
         {
-            received = TWDR;           // Reads received data from TWI data register
+            received = TWDR; // Reads received data from TWI data register
 
-            if (received == 0x01)      // If the command is 0x01, toggle LED
+            if (received == 0x01) // If the command is 0x01, toggle LED
             {
-                led_b_state ^= 1;      // Toggles internal LED state variable
+                led_b_state ^= 1; // Toggles internal LED state variable
 
-                if (led_b_state)       // If LED state is ON
-                    PORTD |= (1 << LED_B);  // Turns LED pin high
+                if (led_b_state) // If LED state is ON
+                    PORTD |= (1 << LED_B); // Turns LED pin high
                 else
                     PORTD &= ~(1 << LED_B); // Turns LED pin low
             }
@@ -73,10 +73,10 @@ int main(void)
         {
             button_b_state = !(PIND & (1 << BUTTON_B)); // Reads button (active-low to active-high)
 
-            toggle_event_b = 0;          // Assumes no new toggle event by default
+            toggle_event_b = 0; // Assumes no new toggle event by default
             if (button_b_state == 1 && prev_button_b_state == 0) // Rising edge (button just pressed)
             {
-                toggle_event_b = 1;      // Marks a new toggle event
+                toggle_event_b = 1; // Marks a new toggle event
             }
             prev_button_b_state = button_b_state; // Stores current button state for next time
 
